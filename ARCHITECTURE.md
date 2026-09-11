@@ -31,3 +31,10 @@ that ratio before storage, so gallery cards and the details dialog can fill thei
 media area without letterboxing, stretching, or layout-specific exceptions.
 
 The Repository pattern is the deliberate seam for FastAPI. The rest is regular Vue composition, without an unnecessary global store or component library.
+
+## Prompt package
+
+`prompt-kits.json` stores one shared manifesto, one editable user-request template,
+and immutable constants keyed by design. The repository selects a design kit,
+`promptPackage.js` serializes its three files and merged Markdown, and the download
+service packages the same files into a dependency-free ZIP archive.

@@ -1,6 +1,9 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { createPromptFiles, mergePromptFiles } from '../../domain/promptPackage'
+import { getDesignPromptKit } from '../../repositories/designRepository'
+import { downloadPromptKit } from '../../services/promptKitDownload'
 
 const props = defineProps({
   design: { type: Object, default: null },
@@ -10,7 +13,9 @@ const emit = defineEmits(['close'])
 const router = useRouter()
 const dialog = ref(null)
 const copyLabel = ref('نسخ البرومبت')
+const downloadLabel = ref('تحميل الملفات')
 const reaction = ref(null)
+const promptFiles = ref(null)
 const previewUrl = computed(() =>
   props.design ? `${import.meta.env.BASE_URL}${props.design.preview}` : '',
 )
@@ -22,7 +27,9 @@ watch(
     if (design && dialog.value && !dialog.value.open) dialog.value.showModal()
     if (!design && dialog.value?.open) dialog.value.close()
     copyLabel.value = 'نسخ البرومبت'
+    downloadLabel.value = 'تحميل الملفات'
     reaction.value = null
+    promptFiles.value = null
   },
 )
 
@@ -30,10 +37,32 @@ async function copyPrompt() {
   if (!props.design) return
 
   try {
-    await navigator.clipboard.writeText(props.design.prompt)
+    copyLabel.value = 'جاري التحضير…'
+    const files = await loadPromptFiles()
+    await navigator.clipboard.writeText(mergePromptFiles(files))
     copyLabel.value = 'تم النسخ'
   } catch {
     copyLabel.value = 'تعذر النسخ'
+  }
+}
+
+async function loadPromptFiles() {
+  if (promptFiles.value) return promptFiles.value
+  const promptKit = await getDesignPromptKit(props.design.id)
+  promptFiles.value = createPromptFiles(promptKit)
+  return promptFiles.value
+}
+
+async function downloadFiles() {
+  if (!props.design) return
+
+  try {
+    downloadLabel.value = 'جاري التحضير…'
+    const files = await loadPromptFiles()
+    downloadPromptKit(files, props.design.title, props.design.id)
+    downloadLabel.value = 'تم التحميل'
+  } catch {
+    downloadLabel.value = 'تعذر التحميل'
   }
 }
 
@@ -107,6 +136,9 @@ function closeFromBackdrop(event) {
         </div>
         <div class="details__actions">
           <button class="details__demo" type="button" @click="openDemo">Live demo</button>
+          <button class="details__download" type="button" @click="downloadFiles">
+            {{ downloadLabel }}
+          </button>
           <button class="details__copy" type="button" @click="copyPrompt">{{ copyLabel }}</button>
         </div>
       </div>
@@ -255,9 +287,15 @@ function closeFromBackdrop(event) {
 }
 
 .details__copy {
+  grid-column: 1 / -1;
   border: 0;
   color: #fff;
   background: #171717;
+}
+
+.details__download {
+  border: 1px solid #d8d4ce;
+  background: #f7f5f1;
 }
 
 .details__close {

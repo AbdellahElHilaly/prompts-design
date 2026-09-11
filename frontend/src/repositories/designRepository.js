@@ -4,6 +4,7 @@ const mockApiUrl = (resource) =>
   `${import.meta.env.BASE_URL}mock-api/${resource}`
 
 let designsRequest
+let promptKitsRequest
 
 async function fetchJson(resource) {
   const response = await fetch(mockApiUrl(resource))
@@ -32,4 +33,27 @@ export async function getDesignDemo(designId) {
   const demo = demos[designId]
   if (!demo) throw new Error('Design demo not found')
   return demo
+}
+
+export async function getDesignPromptKit(designId) {
+  if (!promptKitsRequest) {
+    promptKitsRequest = fetchJson('prompt-kits.json')
+  }
+
+  const payload = await promptKitsRequest
+  const constants = payload.files.constants.contentByDesign[designId]
+  if (!constants) throw new Error('Design prompt kit not found')
+
+  return {
+    schemaVersion: payload.schemaVersion,
+    designId,
+    files: {
+      manifesto: payload.files.manifesto,
+      constants: {
+        filename: payload.files.constants.filename,
+        content: constants,
+      },
+      userRequest: payload.files.userRequest,
+    },
+  }
 }
