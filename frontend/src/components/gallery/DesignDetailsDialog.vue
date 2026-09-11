@@ -1,11 +1,13 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   design: { type: Object, default: null },
 })
 
 const emit = defineEmits(['close'])
+const router = useRouter()
 const dialog = ref(null)
 const copyLabel = ref('نسخ البرومبت')
 const previewUrl = computed(() =>
@@ -33,6 +35,15 @@ async function copyPrompt() {
   }
 }
 
+function openDemo() {
+  if (!props.design) return
+  const url = router.resolve({
+    name: 'demo',
+    params: { designId: props.design.id },
+  }).href
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 function close() {
   dialog.value?.close()
 }
@@ -53,16 +64,19 @@ function closeFromBackdrop(event) {
   >
     <article v-if="design" class="details__panel">
       <button class="details__close" type="button" aria-label="إغلاق" @click="close">×</button>
-      <img class="details__preview" :src="previewUrl" :alt="design.title" />
+      <div class="details__media">
+        <img class="details__preview" :src="previewUrl" :alt="design.title" />
+      </div>
       <div class="details__content">
         <div class="details__heading">
           <h2 id="details-title">{{ design.title }}</h2>
           <span aria-label="التقييم">★ {{ design.rating }}</span>
         </div>
         <p>{{ design.description }}</p>
-        <button class="details__copy" type="button" @click="copyPrompt">
-          {{ copyLabel }}
-        </button>
+        <div class="details__actions">
+          <button class="details__demo" type="button" @click="openDemo">Live demo</button>
+          <button class="details__copy" type="button" @click="copyPrompt">{{ copyLabel }}</button>
+        </div>
       </div>
     </article>
   </dialog>
@@ -74,7 +88,7 @@ function closeFromBackdrop(event) {
   max-width: none;
   max-height: calc(100dvh - 20px);
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
   border: 0;
   border-radius: 28px;
   background: #fff;
@@ -89,20 +103,33 @@ function closeFromBackdrop(event) {
 .details__panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr);
-  min-height: min(700px, calc(100dvh - 20px));
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr);
+  height: min(760px, calc(100dvh - 20px));
+  min-height: 0;
+}
+
+.details__media {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  background: #eeeae4;
 }
 
 .details__preview {
   width: 100%;
   height: 100%;
-  min-height: 420px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .details__content {
   display: flex;
+  min-height: 0;
   flex-direction: column;
+  overflow-y: auto;
   padding: clamp(28px, 4vw, 56px);
 }
 
@@ -132,16 +159,29 @@ function closeFromBackdrop(event) {
   line-height: 1.8;
 }
 
-.details__copy {
-  width: 100%;
+.details__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   margin-top: auto;
-  padding: 15px 20px;
-  border: 0;
+}
+
+.details__actions button {
+  padding: 15px 16px;
   border-radius: 15px;
-  color: #fff;
-  background: #171717;
   font-weight: 750;
   cursor: pointer;
+}
+
+.details__demo {
+  border: 1px solid #d8d4ce;
+  background: #fff;
+}
+
+.details__copy {
+  border: 0;
+  color: #fff;
+  background: #171717;
 }
 
 .details__close {
@@ -173,14 +213,12 @@ function closeFromBackdrop(event) {
 
   .details__panel {
     grid-template-columns: 1fr;
-    min-height: 100%;
+    grid-template-rows: minmax(240px, 52dvh) minmax(0, 1fr);
+    height: 100dvh;
   }
 
-  .details__preview {
-    height: min(54dvh, 520px);
-    min-height: 280px;
+  .details__content {
+    padding: 24px 20px;
   }
-
-  .details__content { min-height: 330px; }
 }
 </style>

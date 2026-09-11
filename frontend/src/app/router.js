@@ -9,6 +9,11 @@ const router = createRouter({
       name: 'gallery',
       component: GalleryView,
     },
+    {
+      path: '/demo/:designId',
+      name: 'demo',
+      component: () => import('../views/DemoView.vue'),
+    },
   ],
 })
 
