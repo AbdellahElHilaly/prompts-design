@@ -24,4 +24,10 @@ The application follows one dependency direction:
 5. Add a file only when it owns a distinct responsibility.
 6. Prefer native browser features before adding a dependency.
 
+## Preview media contract
+
+Preview images use a single `4:3` aspect ratio. Admin uploads will be cropped to
+that ratio before storage, so gallery cards and the details dialog can fill their
+media area without letterboxing, stretching, or layout-specific exceptions.
+
 The Repository pattern is the deliberate seam for FastAPI. The rest is regular Vue composition, without an unnecessary global store or component library.

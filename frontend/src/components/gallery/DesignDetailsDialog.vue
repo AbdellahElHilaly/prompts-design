@@ -84,7 +84,7 @@ function closeFromBackdrop(event) {
 
 <style scoped>
 .details {
-  width: min(1120px, calc(100% - 20px));
+  width: min(1120px, calc(100% - 20px), calc(200dvh - 40px));
   max-width: none;
   max-height: calc(100dvh - 20px);
   padding: 0;
@@ -103,26 +103,22 @@ function closeFromBackdrop(event) {
 .details__panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr);
-  height: min(760px, calc(100dvh - 20px));
+  grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
   min-height: 0;
 }
 
 .details__media {
-  display: grid;
   min-width: 0;
   min-height: 0;
-  place-items: center;
   overflow: hidden;
-  background: #eeeae4;
+  aspect-ratio: 4 / 3;
 }
 
 .details__preview {
+  display: block;
   width: 100%;
   height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .details__content {
@@ -205,19 +201,24 @@ function closeFromBackdrop(event) {
 @media (max-width: 760px) {
   .details {
     width: 100%;
-    height: 100dvh;
-    max-height: none;
+    max-height: 100dvh;
     margin: 0;
+    overflow-y: auto;
     border-radius: 0;
   }
 
   .details__panel {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(240px, 52dvh) minmax(0, 1fr);
-    height: 100dvh;
+    display: block;
+  }
+
+  .details__media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
   }
 
   .details__content {
+    min-height: 300px;
+    overflow: visible;
     padding: 24px 20px;
   }
 }
