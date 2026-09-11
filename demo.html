@@ -22,13 +22,13 @@
     }
 
     function composeDocument(demo) {
-      const safeCss = demo.css.replace(/<\\/style/gi, '<\\\\/style')
-      const safeJs = demo.js.replace(/<\\/script/gi, '<\\\\/script')
+      const safeCss = demo.css.replace(/<\/style/gi, '<\\/style')
+      const safeJs = demo.js.replace(/<\/script/gi, '<\\/script')
       return '<!doctype html><html lang="en"><head><meta charset="UTF-8">' +
         '<meta name="viewport" content="width=device-width,initial-scale=1">' +
         '<title>' + escapeText(demo.title) + '</title><style>' + safeCss +
         '</style></head><body>' + demo.html + '<script>' + safeJs +
-        '<\\/script></body></html>'
+        '<\/script></body></html>'
     }
 
     fetch('./mock-api/demos.json')
@@ -49,6 +49,6 @@
       .catch(() => {
         statusElement.textContent = 'تعذر تحميل هذا التصميم.'
       })
-  <\/script>
+  </script>
 </body>
 </html>
