@@ -1,8 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import router from './app/router'
 import './styles.css'
 
-createApp(App).mount('#app')
+createApp(App).use(router).mount('#app')
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
