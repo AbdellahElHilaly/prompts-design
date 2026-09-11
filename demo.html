@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f3ef">
+  <title>Live demo — Prompt Design</title>
+  <style>
+    *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{display:grid;place-items:center;background:#f5f3ef;color:#666;font-family:system-ui,sans-serif}iframe{width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <p id="status">جاري تشغيل التصميم…</p>
+  <script>
+    const statusElement = document.querySelector('#status')
+    const designId = new URLSearchParams(location.search).get('id')
+
+    function escapeText(value) {
+      return String(value).replace(/[&<>"]/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+      })[character])
+    }
+
+    function composeDocument(demo) {
+      const safeCss = demo.css.replace(/<\\/style/gi, '<\\\\/style')
+      const safeJs = demo.js.replace(/<\\/script/gi, '<\\\\/script')
+      return '<!doctype html><html lang="en"><head><meta charset="UTF-8">' +
+        '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+        '<title>' + escapeText(demo.title) + '</title><style>' + safeCss +
+        '</style></head><body>' + demo.html + '<script>' + safeJs +
+        '<\\/script></body></html>'
+    }
+
+    fetch('./mock-api/demos.json')
+      .then((response) => {
+        if (!response.ok) throw new Error('Mock API error')
+        return response.json()
+      })
+      .then((demos) => {
+        const demo = demos[designId]
+        if (!demo) throw new Error('Demo not found')
+        const frame = document.createElement('iframe')
+        frame.title = demo.title
+        frame.sandbox = 'allow-scripts allow-forms allow-modals'
+        frame.referrerPolicy = 'no-referrer'
+        frame.srcdoc = composeDocument(demo)
+        statusElement.replaceWith(frame)
+      })
+      .catch(() => {
+        statusElement.textContent = 'تعذر تحميل هذا التصميم.'
+      })
+  <\/script>
+</body>
+</html>

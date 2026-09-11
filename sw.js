@@ -1,35 +1,35 @@
-const CACHE_NAME = 'prompt-design-v2'
+const CACHE_NAME = 'prompt-design-v3'
 const APP_SHELL = [
   './',
   './index.html',
+  './demo.html',
   './manifest.webmanifest',
   './favicon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './pages-runtime/details.css',
+  './pages-runtime/details.js',
+  './mock-api/designs.json',
+  './mock-api/demos.json',
 ]
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
-  )
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)))
   self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
-      ),
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+    ),
   )
   self.clients.claim()
 })
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
-
   const requestUrl = new URL(event.request.url)
   if (requestUrl.origin !== self.location.origin) return
 
