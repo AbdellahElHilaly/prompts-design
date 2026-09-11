@@ -4,7 +4,7 @@ export const mockDesigns = [
     title: 'لوحة تحكم زجاجية',
     preview: 'previews/glass-dashboard.webp',
     description: 'لوحة تحليلات هادئة بمساحات واضحة ومؤشرات سهلة القراءة.',
-    rating: 4.9,
+    approvalRate: 98,
     prompt: 'Create a responsive glassmorphism analytics dashboard with an airy blue palette, clear KPI cards, charts, a compact sidebar, and generous whitespace.',
   },
   {
@@ -12,7 +12,7 @@ export const mockDesigns = [
     title: 'مشغل موسيقى ليلي',
     preview: 'previews/midnight-player.webp',
     description: 'تجربة صوتية داكنة بتباين قوي وحركة بصرية مركزة.',
-    rating: 4.8,
+    approvalRate: 96,
     prompt: 'Design a cinematic dark music player with violet and coral accents, bold album art, a clean queue, waveform, and responsive controls.',
   },
   {
@@ -20,7 +20,7 @@ export const mockDesigns = [
     title: 'متجر دافئ وبسيط',
     preview: 'previews/minimal-store.webp',
     description: 'صفحة منتج تحريرية تضع الصورة وقرار الشراء في الواجهة.',
-    rating: 4.9,
+    approvalRate: 98,
     prompt: 'Build a minimal editorial product page in cream, black, and terracotta with a large product gallery, simple options, and a prominent purchase action.',
   },
   {
@@ -28,7 +28,7 @@ export const mockDesigns = [
     title: 'نظرة مالية',
     preview: 'previews/finance-overview.webp',
     description: 'عرض مالي مركز يختصر البيانات المهمة في بطاقات خفيفة.',
-    rating: 4.7,
+    approvalRate: 94,
     prompt: 'Create a light financial overview dashboard with compact metrics, accessible charts, soft cyan highlights, and a calm information hierarchy.',
   },
   {
@@ -36,7 +36,7 @@ export const mockDesigns = [
     title: 'استوديو بودكاست',
     preview: 'previews/podcast-studio.webp',
     description: 'واجهة إنتاج صوتي تبرز التشغيل والموجة وقائمة الحلقات.',
-    rating: 4.6,
+    approvalRate: 92,
     prompt: 'Design a responsive podcast studio in charcoal and plum with a focused player, episode queue, timeline, and clear recording states.',
   },
   {
@@ -44,7 +44,7 @@ export const mockDesigns = [
     title: 'منتج في الواجهة',
     preview: 'previews/product-focus.webp',
     description: 'متجر بسيط يجعل المنتج محور الصفحة من دون ضجيج بصري.',
-    rating: 4.8,
+    approvalRate: 96,
     prompt: 'Create a quiet-luxury ecommerce layout with oversized product photography, restrained typography, warm neutrals, and one unmistakable CTA.',
   },
   {
@@ -52,7 +52,7 @@ export const mockDesigns = [
     title: 'مساحة عمل الفريق',
     preview: 'previews/team-console.webp',
     description: 'لوحة عملية لتتبع العمل بوضوح على كل أحجام الشاشات.',
-    rating: 4.5,
+    approvalRate: 90,
     prompt: 'Build a clean team operations dashboard with modular cards, readable progress charts, a compact navigation rail, and responsive density.',
   },
   {
@@ -60,7 +60,7 @@ export const mockDesigns = [
     title: 'مكتبة صوتية',
     preview: 'previews/audio-library.webp',
     description: 'مكتبة داكنة وغامرة تسهّل تصفح المحتوى وتشغيله.',
-    rating: 4.7,
+    approvalRate: 94,
     prompt: 'Create an immersive audio library with dark layered surfaces, luminous artwork, fast browsing, and an elegant persistent player.',
   },
   {
@@ -68,7 +68,7 @@ export const mockDesigns = [
     title: 'شراء بدون تشتيت',
     preview: 'previews/warm-checkout.webp',
     description: 'تدفق شراء هادئ وواضح مع أقل عدد ممكن من القرارات.',
-    rating: 4.6,
+    approvalRate: 92,
     prompt: 'Design a distraction-free checkout flow using warm neutrals, strong spacing, clear pricing, reassuring details, and a single primary action.',
   },
 ]

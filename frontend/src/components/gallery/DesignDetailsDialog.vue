@@ -10,6 +10,7 @@ const emit = defineEmits(['close'])
 const router = useRouter()
 const dialog = ref(null)
 const copyLabel = ref('نسخ البرومبت')
+const reaction = ref(null)
 const previewUrl = computed(() =>
   props.design ? `${import.meta.env.BASE_URL}${props.design.preview}` : '',
 )
@@ -21,6 +22,7 @@ watch(
     if (design && dialog.value && !dialog.value.open) dialog.value.showModal()
     if (!design && dialog.value?.open) dialog.value.close()
     copyLabel.value = 'نسخ البرومبت'
+    reaction.value = null
   },
 )
 
@@ -42,6 +44,10 @@ function openDemo() {
     params: { designId: props.design.id },
   }).href
   window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+function toggleReaction(value) {
+  reaction.value = reaction.value === value ? null : value
 }
 
 function close() {
@@ -70,9 +76,35 @@ function closeFromBackdrop(event) {
       <div class="details__content">
         <div class="details__heading">
           <h2 id="details-title">{{ design.title }}</h2>
-          <span aria-label="التقييم">★ {{ design.rating }}</span>
+          <span class="details__score" aria-label="نسبة الإعجاب">
+            {{ design.approvalRate }}%
+          </span>
         </div>
         <p>{{ design.description }}</p>
+        <div class="details__reactions" aria-label="تقييم التصميم">
+          <button
+            type="button"
+            aria-label="أعجبني"
+            :aria-pressed="reaction === 'like'"
+            :class="{ 'is-active': reaction === 'like' }"
+            @click="toggleReaction('like')"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 10v10H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h3Zm0 8h10.2a2 2 0 0 0 1.95-1.55l1.38-6A2 2 0 0 0 18.58 8H14l.7-3.1A2.35 2.35 0 0 0 12.4 2L7 10v8Z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="لم يعجبني"
+            :aria-pressed="reaction === 'dislike'"
+            :class="{ 'is-active is-dislike': reaction === 'dislike' }"
+            @click="toggleReaction('dislike')"
+          >
+            <svg class="details__thumb-down" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 10v10H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h3Zm0 8h10.2a2 2 0 0 0 1.95-1.55l1.38-6A2 2 0 0 0 18.58 8H14l.7-3.1A2.35 2.35 0 0 0 12.4 2L7 10v8Z" />
+            </svg>
+          </button>
+        </div>
         <div class="details__actions">
           <button class="details__demo" type="button" @click="openDemo">Live demo</button>
           <button class="details__copy" type="button" @click="copyPrompt">{{ copyLabel }}</button>
@@ -142,9 +174,13 @@ function closeFromBackdrop(event) {
   line-height: 1.15;
 }
 
-.details__heading span {
+.details__score {
   flex: 0 0 auto;
-  color: #8c6513;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #23664d;
+  background: #e8f4ee;
+  font-size: 0.9rem;
   font-weight: 750;
 }
 
@@ -153,6 +189,50 @@ function closeFromBackdrop(event) {
   color: #656565;
   font-size: 1.03rem;
   line-height: 1.8;
+}
+
+.details__reactions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.details__reactions button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #ddd9d3;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.details__reactions svg {
+  width: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.details__reactions button.is-active {
+  border-color: #9ad5bc;
+  color: #176845;
+  background: #e8f4ee;
+}
+
+.details__reactions button.is-dislike {
+  border-color: #efb5b5;
+  color: #a43a3a;
+  background: #fff0f0;
+}
+
+.details__thumb-down {
+  transform: rotate(180deg);
 }
 
 .details__actions {
