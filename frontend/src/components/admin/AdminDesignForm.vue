@@ -5,12 +5,14 @@ const props = defineProps({
   design: { type: Object, default: null },
   isNew: { type: Boolean, default: false },
   isBusy: { type: Boolean, default: false },
+  section: { type: String, default: 'info' },
 })
 
 const emit = defineEmits(['save', 'delete', 'back'])
 const draft = ref(null)
 const constantsText = ref('')
 const codeTab = ref('html')
+const activeSection = ref('info')
 const localError = ref('')
 
 watch(
@@ -20,6 +22,12 @@ watch(
     constantsText.value = design ? JSON.stringify(design.constants, null, 2) : ''
     localError.value = ''
   },
+  { immediate: true },
+)
+
+watch(
+  () => props.section,
+  (section) => { activeSection.value = section },
   { immediate: true },
 )
 
@@ -81,27 +89,42 @@ function submit() {
 
     <p v-if="localError" class="error">{{ localError }}</p>
 
-    <section class="fields fields--meta">
+    <nav class="editor-tabs" aria-label="أقسام التصميم">
+      <button type="button" :class="{ active: activeSection === 'info' }" @click="activeSection = 'info'">المعلومات</button>
+      <button type="button" :class="{ active: activeSection === 'image' }" @click="activeSection = 'image'">الصورة</button>
+      <button type="button" :class="{ active: activeSection === 'demo' }" @click="activeSection = 'demo'">Demo</button>
+      <button type="button" :class="{ active: activeSection === 'prompt' }" @click="activeSection = 'prompt'">البرومبت</button>
+    </nav>
+
+    <section v-show="activeSection === 'info'" class="fields fields--meta">
       <label>المعرّف<input v-model.trim="draft.id" :readonly="!isNew" placeholder="design-id" /></label>
       <label>الاسم<input v-model.trim="draft.title" placeholder="اسم التصميم" /></label>
       <label>نسبة الإعجاب<input v-model.number="draft.approvalRate" type="number" min="0" max="100" /></label>
       <label class="wide">الوصف<textarea v-model.trim="draft.description" rows="2" /></label>
     </section>
 
-    <section class="asset-row">
+    <section v-show="activeSection === 'image'" class="asset-panel">
       <img v-if="previewUrl" :src="previewUrl" alt="معاينة التصميم" />
       <div v-else class="asset-placeholder">4:3</div>
-      <label class="upload">رفع صورة 4:3<input type="file" accept="image/png,image/jpeg,image/webp" @change="setPreview" /></label>
+      <div>
+        <strong>صورة بطاقة التصميم</strong>
+        <p>نسبة 4:3، وسيتم ضغطها تلقائياً قبل الحفظ.</p>
+        <label class="upload">اختيار صورة<input type="file" accept="image/png,image/jpeg,image/webp" @change="setPreview" /></label>
+      </div>
     </section>
 
-    <section class="code-editor">
+    <section v-show="activeSection === 'demo'" class="code-editor">
       <nav>
         <button v-for="tab in ['html', 'css', 'js']" :key="tab" type="button" :class="{ active: codeTab === tab }" @click="codeTab = tab">{{ tab.toUpperCase() }}</button>
       </nav>
       <textarea v-model="draft.demo[codeTab]" dir="ltr" spellcheck="false" :aria-label="`كود ${codeTab}`" />
     </section>
 
-    <label class="const-editor">CONSTS.json<textarea v-model="constantsText" dir="ltr" spellcheck="false" /></label>
+    <label v-show="activeSection === 'prompt'" class="const-editor">
+      <span>CONSTS.json</span>
+      <small>ثوابت التصميم التي ستدخل في حزمة البرومبت.</small>
+      <textarea v-model="constantsText" dir="ltr" spellcheck="false" />
+    </label>
   </form>
   <div v-else class="empty">اختر تصميماً أو أنشئ واحداً جديداً.</div>
 </template>
@@ -138,8 +161,16 @@ textarea { padding: 8px; resize: vertical; line-height: 1.45; }
 .const-editor textarea { min-height: 240px; font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; }
 .error { margin: 8px 10px 0; padding: 7px 9px; border-radius: 6px; color: #8d2929; background: #fff0f0; font-size: .75rem; }
 .empty { display: grid; min-height: 260px; place-items: center; color: #777; }
+.editor-tabs { display: flex; gap: 3px; padding: 6px 10px; border-bottom: 1px solid #e4e1db; overflow-x: auto; background: #faf9f6; }
+.editor-tabs button { flex: 0 0 auto; min-height: 30px; padding: 4px 10px; border-color: transparent; background: transparent; font-size: .72rem; }
+.editor-tabs button.active { border-color: #d7d3cc; background: #fff; font-weight: 750; }
+.asset-panel { display: grid; grid-template-columns: minmax(180px, 340px) minmax(180px, 1fr); align-items: start; gap: 14px; padding: 12px; }
+.asset-panel img, .asset-panel > .asset-placeholder { width: 100%; aspect-ratio: 4 / 3; height: auto; border-radius: 8px; object-fit: cover; }
+.asset-panel strong { display: block; margin-top: 4px; font-size: .84rem; }
+.asset-panel p { margin: 5px 0 12px; color: #77736d; font-size: .72rem; }
+.const-editor small { color: #77736d; font-size: .66rem; font-weight: 400; }
 @media (max-width: 720px) {
-  .editor__bar { top: 48px; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 6px; min-height: auto; padding: 7px; }
+  .editor__bar { top: 52px; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 6px; min-height: auto; padding: 7px; }
   .editor__bar strong { width: 100%; margin: 0; }
   .editor__bar select { max-width: 104px; }
   .editor__actions { grid-column: 2 / -1; justify-content: flex-end; }
@@ -148,8 +179,9 @@ textarea { padding: 8px; resize: vertical; line-height: 1.45; }
   .fields { gap: 7px; padding: 8px; }
   .fields--meta { grid-template-columns: 1fr; }
   .fields--meta label:nth-child(3), .wide { grid-column: auto; }
-  .asset-row { grid-template-columns: 96px minmax(0, 1fr); padding: 0 8px 8px; }
-  .asset-row img, .asset-placeholder { width: 96px; height: 72px; }
+  .editor-tabs { position: sticky; top: 121px; z-index: 1; padding-inline: 7px; }
+  .asset-panel { grid-template-columns: 1fr; gap: 8px; padding: 8px; }
+  .asset-panel img, .asset-panel > .asset-placeholder { max-height: 58dvh; }
   .upload { width: 100%; text-align: center; }
   .code-editor, .const-editor { margin: 0 8px 8px; }
   .code-editor textarea { min-height: 220px; }

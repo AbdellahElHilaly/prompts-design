@@ -53,6 +53,26 @@ export function useAdminDesigns() {
     message.value = ''
   }
 
+  function duplicateDesign(design = selected.value) {
+    if (!design) return
+    const baseId = `${design.id}-copy`
+    let nextId = baseId
+    let suffix = 2
+    while (designs.value.some((item) => item.id === nextId)) {
+      nextId = `${baseId}-${suffix}`
+      suffix += 1
+    }
+    selected.value = {
+      ...structuredClone(design),
+      id: nextId,
+      title: `${design.title} — نسخة`,
+      status: 'draft',
+      sortOrder: Date.now(),
+    }
+    isNew.value = true
+    message.value = 'تم إنشاء نسخة غير محفوظة. عدّلها ثم اضغط حفظ.'
+  }
+
   async function saveDesign(design) {
     const errors = validateAdminDesign(design)
     if (errors.length) {
@@ -117,6 +137,7 @@ export function useAdminDesigns() {
 
   return {
     contract,
+    duplicateDesign,
     filteredDesigns,
     isBusy,
     isNew,
