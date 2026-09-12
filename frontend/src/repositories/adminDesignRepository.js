@@ -1,5 +1,7 @@
 const DESIGNS_KEY = 'prompt-designs'
 const CONTRACT_KEY = 'prompt-design-contract'
+const SESSION_KEY = 'prompt-design-session-expires-at'
+const SESSION_DURATION_MS = 30 * 60 * 1000
 
 const staticDataUrl = (resource) =>
   `${import.meta.env.BASE_URL}static-data/${resource}`
@@ -10,7 +12,24 @@ async function readStaticJson(resource) {
   return response.json()
 }
 
+function ensureSession() {
+  const expiresAt = Number(localStorage.getItem(SESSION_KEY))
+  if (expiresAt > Date.now()) return expiresAt
+  localStorage.removeItem(DESIGNS_KEY)
+  localStorage.removeItem(CONTRACT_KEY)
+  const nextExpiry = Date.now() + SESSION_DURATION_MS
+  localStorage.setItem(SESSION_KEY, String(nextExpiry))
+  return nextExpiry
+}
+
+function restartSession() {
+  localStorage.removeItem(DESIGNS_KEY)
+  localStorage.removeItem(CONTRACT_KEY)
+  localStorage.setItem(SESSION_KEY, String(Date.now() + SESSION_DURATION_MS))
+}
+
 function readLocal(key) {
+  ensureSession()
   const value = localStorage.getItem(key)
   if (!value) return null
   try {
@@ -22,7 +41,12 @@ function readLocal(key) {
 }
 
 function writeLocal(key, value) {
+  ensureSession()
   localStorage.setItem(key, JSON.stringify(value))
+}
+
+export function getAdminSessionExpiresAt() {
+  return ensureSession()
 }
 
 async function readSeedDesigns() {
@@ -71,6 +95,7 @@ export async function deleteAdminDesign(designId) {
 }
 
 export async function resetAdminDesigns() {
+  restartSession()
   const designs = await readSeedDesigns()
   writeLocal(DESIGNS_KEY, designs)
   return designs

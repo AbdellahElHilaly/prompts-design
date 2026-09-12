@@ -1,8 +1,9 @@
-import { computed, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import { createEmptyDesign, validateAdminDesign } from '../domain/adminDesign'
 import {
   deleteAdminDesign,
   getAdminPromptContract,
+  getAdminSessionExpiresAt,
   listAdminDesigns,
   resetAdminDesigns,
   saveAdminDesign,
@@ -17,6 +18,7 @@ export function useAdminDesigns() {
   const isBusy = ref(false)
   const message = ref('')
   const query = ref('')
+  let expiryTimer
 
   const filteredDesigns = computed(() => {
     const needle = query.value.trim().toLocaleLowerCase()
@@ -34,11 +36,27 @@ export function useAdminDesigns() {
         getAdminPromptContract(),
       ])
       if (!selected.value && designs.value.length) selectDesign(designs.value[0])
+      scheduleSessionExpiry()
     } catch {
       message.value = 'تعذر تحميل بيانات لوحة الإدارة.'
     } finally {
       isBusy.value = false
     }
+  }
+
+  function scheduleSessionExpiry() {
+    window.clearTimeout(expiryTimer)
+    const delay = Math.max(0, getAdminSessionExpiresAt() - Date.now())
+    expiryTimer = window.setTimeout(async () => {
+      ;[designs.value, contract.value] = await Promise.all([
+        listAdminDesigns(),
+        getAdminPromptContract(),
+      ])
+      selected.value = designs.value[0] ? structuredClone(designs.value[0]) : null
+      isNew.value = false
+      message.value = 'انتهت جلسة 30 دقيقة وتمت استعادة بيانات JSON.'
+      scheduleSessionExpiry()
+    }, delay + 100)
   }
 
   function selectDesign(design) {
@@ -122,12 +140,15 @@ export function useAdminDesigns() {
       selected.value = designs.value[0] ? structuredClone(designs.value[0]) : null
       isNew.value = false
       message.value = 'تمت استعادة بيانات JSON الأصلية.'
+      scheduleSessionExpiry()
     } catch {
       message.value = 'تعذرت استعادة بيانات JSON.'
     } finally {
       isBusy.value = false
     }
   }
+
+  onScopeDispose(() => window.clearTimeout(expiryTimer))
 
   async function saveContract(value) {
     await saveAdminPromptContract(value)

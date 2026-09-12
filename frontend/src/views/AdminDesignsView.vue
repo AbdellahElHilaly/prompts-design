@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminDesignForm from '../components/admin/AdminDesignForm.vue'
 import AdminDesignList from '../components/admin/AdminDesignList.vue'
@@ -13,6 +13,9 @@ const router = useRouter()
 const screen = ref('list')
 const editorSection = ref('info')
 const sidebarOpen = ref(false)
+const sortMode = ref('best')
+const page = ref(1)
+const pageSize = ref(10)
 const {
   contract,
   duplicateDesign,
@@ -32,6 +35,27 @@ const {
 } = useAdminDesigns()
 
 const selectedId = computed(() => selected.value?.id ?? '')
+const orderedDesigns = computed(() => {
+  const items = [...filteredDesigns.value]
+  const sorters = {
+    best: (left, right) => right.approvalRate - left.approvalRate,
+    worst: (left, right) => left.approvalRate - right.approvalRate,
+    newest: (left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt)),
+    name: (left, right) => left.title.localeCompare(right.title, 'ar'),
+  }
+  return items.sort(sorters[sortMode.value])
+})
+const totalPages = computed(() => Math.max(1, Math.ceil(orderedDesigns.value.length / pageSize.value)))
+const visibleDesigns = computed(() => {
+  const start = (page.value - 1) * pageSize.value
+  return orderedDesigns.value.slice(start, start + pageSize.value)
+})
+const resultRange = computed(() => {
+  if (!orderedDesigns.value.length) return '0'
+  const start = (page.value - 1) * pageSize.value + 1
+  const end = Math.min(page.value * pageSize.value, orderedDesigns.value.length)
+  return `${start}–${end} من ${orderedDesigns.value.length}`
+})
 const screenTitle = computed(() => {
   if (screen.value === 'contract') return 'عقد البرومبت'
   if (screen.value === 'editor') return selected.value?.title || 'تصميم جديد'
@@ -39,6 +63,10 @@ const screenTitle = computed(() => {
 })
 
 onMounted(load)
+watch([query, sortMode, pageSize], () => { page.value = 1 })
+watch(totalPages, (total) => {
+  if (page.value > total) page.value = total
+})
 
 function closeSidebar() {
   sidebarOpen.value = false
@@ -133,6 +161,8 @@ function runAction(action, design) {
     delete: deleteSelected,
     contract: () => { screen.value = 'contract'; closeSidebar() },
     reset: confirmReset,
+    'sort-best': () => { sortMode.value = 'best'; screen.value = 'list'; closeSidebar() },
+    'sort-worst': () => { sortMode.value = 'worst'; screen.value = 'list'; closeSidebar() },
   }
   handlers[action]?.()
 }
@@ -151,13 +181,18 @@ function runRowAction({ design, action }) {
         <small v-if="screen === 'editor'">{{ editorSection }}</small>
       </div>
       <span v-if="isBusy" class="busy">جارٍ الحفظ…</span>
+      <button
+        class="navbar__contract"
+        type="button"
+        :aria-label="screen === 'contract' ? 'العودة إلى التصاميم' : 'فتح عقد البرومبت'"
+        @click="screen = screen === 'contract' ? 'list' : 'contract'"
+      >{{ screen === 'contract' ? '☷' : '§' }}</button>
       <button class="navbar__add" type="button" aria-label="إضافة تصميم" @click="createDesign">+</button>
       <RouterLink to="/" aria-label="العودة إلى المعرض">←</RouterLink>
     </header>
 
     <AdminSidebar
       :open="sidebarOpen"
-      :has-selection="Boolean(selected)"
       @close="closeSidebar"
       @action="runAction"
     />
@@ -169,20 +204,42 @@ function runRowAction({ design, action }) {
         <div class="list-toolbar">
           <div>
             <h1>كل التصاميم</h1>
-            <small>{{ filteredDesigns.length }} عناصر · اضغط على أي تصميم لتعديله</small>
+            <small>{{ resultRange }} · العمليات داخل زر ⋮</small>
           </div>
           <button type="button" @click="createDesign">+ إضافة تصميم</button>
         </div>
-        <label class="search">
-          <span class="sr-only">البحث</span>
-          <input v-model="query" type="search" placeholder="ابحث بالاسم أو المعرّف…" />
-        </label>
+        <div class="table-tools">
+          <label class="search">
+            <span class="sr-only">البحث</span>
+            <input v-model="query" type="search" placeholder="ابحث بالاسم أو المعرّف…" />
+          </label>
+          <label>الترتيب
+            <select v-model="sortMode">
+              <option value="best">الأفضل أولاً</option>
+              <option value="worst">الأسوأ أولاً</option>
+              <option value="newest">الأحدث تعديلاً</option>
+              <option value="name">حسب الاسم</option>
+            </select>
+          </label>
+          <label>في الصفحة
+            <select v-model.number="pageSize">
+              <option :value="5">5</option>
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+            </select>
+          </label>
+        </div>
         <AdminDesignList
-          :designs="filteredDesigns"
+          :designs="visibleDesigns"
           :selected-id="selectedId"
           @select="(design) => openEditor('info', design)"
           @action="runRowAction"
         />
+        <nav v-if="totalPages > 1" class="pagination" aria-label="صفحات التصاميم">
+          <button type="button" :disabled="page === 1" @click="page -= 1">السابق</button>
+          <span>{{ page }} / {{ totalPages }}</span>
+          <button type="button" :disabled="page === totalPages" @click="page += 1">التالي</button>
+        </nav>
       </template>
 
       <AdminDesignForm
@@ -219,8 +276,14 @@ function runRowAction({ design, action }) {
 .list-toolbar h1 { margin: 0; font-size: 1rem; }
 .list-toolbar small { display: block; margin-top: 3px; color: #77736d; font-size: .68rem; }
 .list-toolbar button { min-height: 34px; padding: 5px 10px; border: 0; border-radius: 7px; color: #fff; background: #252421; font: inherit; font-size: .76rem; font-weight: 750; cursor: pointer; }
-.search { display: block; padding: 0 10px 9px; }
-.search input { width: 100%; height: 36px; padding: 6px 10px; border: 1px solid #d8d4cd; border-radius: 7px; background: #faf9f6; font: inherit; }
+.table-tools { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; align-items: end; gap: 7px; padding: 0 10px 9px; }
+.table-tools label { display: grid; gap: 3px; color: #77736d; font-size: .62rem; }
+.table-tools input, .table-tools select { height: 36px; min-width: 0; padding: 5px 9px; border: 1px solid #d8d4cd; border-radius: 7px; background: #faf9f6; font: inherit; font-size: .74rem; }
+.table-tools select { min-width: 120px; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; border-top: 1px solid #e2dfd9; }
+.pagination button { min-height: 32px; padding: 4px 10px; border: 1px solid #d8d4cd; border-radius: 7px; background: #fff; font: inherit; font-size: .72rem; cursor: pointer; }
+.pagination button:disabled { opacity: .4; cursor: not-allowed; }
+.pagination span { color: #6e6a64; font-size: .7rem; }
 @media (max-width: 800px) {
   .admin-shell { display: block; min-width: 0; }
   .navbar { position: sticky; top: 0; height: 52px; padding-inline: 7px; }
@@ -231,6 +294,8 @@ function runRowAction({ design, action }) {
   .main-area { max-height: none; min-height: calc(100dvh - 52px); overflow: visible; }
   .list-toolbar { min-height: 58px; padding: 8px; }
   .list-toolbar button { display: none; }
-  .search { position: sticky; z-index: 7; top: 52px; padding: 7px 8px; border-block: 1px solid #e2dfd9; background: #fff; }
+  .table-tools { position: sticky; z-index: 7; top: 52px; grid-template-columns: minmax(0, 1fr) 112px; padding: 7px 8px; border-block: 1px solid #e2dfd9; background: #fff; }
+  .table-tools label:last-child { display: none; }
+  .table-tools select { width: 100%; min-width: 0; }
 }
 </style>

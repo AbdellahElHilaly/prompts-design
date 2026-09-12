@@ -44,7 +44,8 @@ service packages the same files into a dependency-free ZIP archive.
 The admin page uses `adminDesignRepository.js` as its only persistence boundary.
 Its current localStorage implementation seeds itself from bundled static JSON.
 It stores uploaded 4:3 previews, demo source, metadata, constants, and the prompt
-authoring contract on the current device. FastAPI can replace this repository
+authoring contract on the current device for a 30-minute admin session. Expired
+state is discarded and reseeded from JSON. FastAPI can replace this repository
 without changing the admin components or their state workflow.
 
 Prompt authoring and prompt delivery are intentionally separate:
