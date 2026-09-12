@@ -73,4 +73,11 @@ label i { display: block; margin-top: 2px; color: #777; font-size: .66rem; font-
 textarea { width: 100%; min-height: calc(100dvh - 130px); padding: 9px; border: 1px solid #dcd8d1; border-radius: 8px; font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; resize: none; }
 .error { margin: 7px 8px 0; padding: 7px 9px; color: #8d2929; background: #fff0f0; font-size: .75rem; }
 @media (max-width: 900px) { .contract__grid { grid-template-columns: 1fr; } textarea { min-height: 280px; resize: vertical; } }
+@media (max-width: 560px) {
+  .contract header { align-items: flex-start; padding: 7px 8px; }
+  .contract header small { max-width: 230px; }
+  .contract button { flex: 0 0 auto; }
+  .contract__grid { gap: 10px; padding: 8px; }
+  textarea { min-height: 320px; }
+}
 </style>

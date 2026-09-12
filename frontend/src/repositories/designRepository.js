@@ -5,14 +5,14 @@ import {
   listAdminDesigns,
 } from './adminDesignRepository'
 
-const mockApiUrl = (resource) =>
-  `${import.meta.env.BASE_URL}mock-api/${resource}`
+const staticDataUrl = (resource) =>
+  `${import.meta.env.BASE_URL}static-data/${resource}`
 
 let promptKitsRequest
 
 async function fetchJson(resource) {
-  const response = await fetch(mockApiUrl(resource))
-  if (!response.ok) throw new Error(`Mock API returned ${response.status}`)
+  const response = await fetch(staticDataUrl(resource))
+  if (!response.ok) throw new Error(`Static data returned ${response.status}`)
   return response.json()
 }
 
@@ -47,7 +47,7 @@ export async function getDesignDemo(designId) {
     const design = await getAdminDesign(designId)
     if (design?.demo) return design.demo
   } catch {
-    // Fall back to the static mock endpoint when IndexedDB is unavailable.
+    // Fall back to the bundled static JSON when local storage is unavailable.
   }
   const demos = await fetchJson('demos.json')
   const demo = demos[designId]

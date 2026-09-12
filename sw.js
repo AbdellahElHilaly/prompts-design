@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-design-v6'
+const CACHE_NAME = 'prompt-design-v7'
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,10 +7,10 @@ const APP_SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
-  './mock-api/designs.json',
-  './mock-api/demos.json',
-  './mock-api/prompt-kits.json',
-  './mock-api/admin-prompt-contract.json',
+  './static-data/designs.json',
+  './static-data/demos.json',
+  './static-data/prompt-kits.json',
+  './static-data/admin-prompt-contract.json',
 ]
 
 self.addEventListener('install', (event) => {

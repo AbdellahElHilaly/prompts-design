@@ -9,9 +9,9 @@ The application follows one dependency direction:
 - `views/`: route-level orchestration only.
 - `components/`: reusable UI; they receive data and emit user intent.
 - `composables/`: screen state and loading workflow.
-- `repositories/`: the data boundary. Replace the mock URLs here when FastAPI is ready.
+- `repositories/`: the data boundary. Replace local persistence here when FastAPI is ready.
 - `domain/`: pure product rules and document composition.
-- `public/mock-api/`: static JSON endpoints that simulate FastAPI on GitHub Pages.
+- `public/static-data/`: bundled JSON used only as the initial offline dataset.
 - `data/`: offline fallback fixtures only.
 - `app/router.js`: route definitions. Gallery and isolated demo routes live here.
 
@@ -42,10 +42,10 @@ service packages the same files into a dependency-free ZIP archive.
 ## Admin write boundary
 
 The admin page uses `adminDesignRepository.js` as its only persistence boundary.
-Its current IndexedDB implementation seeds itself from the static mock API and
-stores uploaded 4:3 previews, demo source, metadata, constants, and the prompt
-authoring contract. FastAPI can replace this repository without changing the
-admin components or their state workflow.
+Its current localStorage implementation seeds itself from bundled static JSON.
+It stores uploaded 4:3 previews, demo source, metadata, constants, and the prompt
+authoring contract on the current device. FastAPI can replace this repository
+without changing the admin components or their state workflow.
 
 Prompt authoring and prompt delivery are intentionally separate:
 

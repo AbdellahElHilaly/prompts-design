@@ -75,6 +75,9 @@ export function useAdminDesigns() {
       selectDesign(designs.value.find((item) => item.id === design.id))
       message.value = 'تم حفظ التصميم محلياً.'
       return true
+    } catch {
+      message.value = 'تعذر الحفظ. قد تكون مساحة تخزين المتصفح ممتلئة.'
+      return false
     } finally {
       isBusy.value = false
     }
@@ -82,21 +85,25 @@ export function useAdminDesigns() {
 
   async function removeDesign() {
     if (!selected.value || isNew.value) return
-    await deleteAdminDesign(selected.value.id)
-    designs.value = await listAdminDesigns()
-    selected.value = designs.value[0] ? structuredClone(designs.value[0]) : null
-    message.value = 'تم حذف التصميم.'
+    try {
+      await deleteAdminDesign(selected.value.id)
+      designs.value = await listAdminDesigns()
+      selected.value = designs.value[0] ? structuredClone(designs.value[0]) : null
+      message.value = 'تم حذف التصميم.'
+    } catch {
+      message.value = 'تعذر حذف التصميم من هذا الجهاز.'
+    }
   }
 
-  async function refreshFromMockApi() {
+  async function resetFromStaticData() {
     isBusy.value = true
     try {
       designs.value = await resetAdminDesigns()
       selected.value = designs.value[0] ? structuredClone(designs.value[0]) : null
       isNew.value = false
-      message.value = 'تمت إعادة جلب بيانات Mock API.'
+      message.value = 'تمت استعادة بيانات JSON الأصلية.'
     } catch {
-      message.value = 'تعذرت إعادة جلب بيانات Mock API.'
+      message.value = 'تعذرت استعادة بيانات JSON.'
     } finally {
       isBusy.value = false
     }
@@ -116,7 +123,7 @@ export function useAdminDesigns() {
     load,
     message,
     query,
-    refreshFromMockApi,
+    resetFromStaticData,
     removeDesign,
     saveContract,
     saveDesign,

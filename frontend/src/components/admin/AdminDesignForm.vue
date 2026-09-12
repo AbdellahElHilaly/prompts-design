@@ -7,7 +7,7 @@ const props = defineProps({
   isBusy: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['save', 'delete'])
+const emit = defineEmits(['save', 'delete', 'back'])
 const draft = ref(null)
 const constantsText = ref('')
 const codeTab = ref('html')
@@ -43,10 +43,13 @@ async function setPreview(event) {
     localError.value = 'صورة المعاينة يجب أن تكون بنسبة 4:3.'
     return
   }
+  const scale = Math.min(1, 1200 / bitmap.width, 900 / bitmap.height)
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  draft.value.preview = canvas.toDataURL('image/webp', 0.82)
   bitmap.close()
-  const reader = new FileReader()
-  reader.onload = () => { draft.value.preview = reader.result }
-  reader.readAsDataURL(file)
   localError.value = ''
 }
 
@@ -64,13 +67,16 @@ function submit() {
 <template>
   <form v-if="draft" class="editor" @submit.prevent="submit">
     <header class="editor__bar">
+      <button class="back" type="button" aria-label="العودة إلى قائمة التصاميم" @click="$emit('back')">←</button>
       <strong>{{ isNew ? 'تصميم جديد' : draft.title }}</strong>
       <select v-model="draft.status" aria-label="حالة التصميم">
         <option value="draft">draft</option>
         <option value="published">published</option>
       </select>
-      <button v-if="!isNew" class="danger" type="button" @click="$emit('delete')">حذف</button>
-      <button class="primary" type="submit" :disabled="isBusy">حفظ</button>
+      <div class="editor__actions">
+        <button v-if="!isNew" class="danger" type="button" @click="$emit('delete')">حذف</button>
+        <button class="primary" type="submit" :disabled="isBusy">حفظ</button>
+      </div>
     </header>
 
     <p v-if="localError" class="error">{{ localError }}</p>
@@ -85,7 +91,7 @@ function submit() {
     <section class="asset-row">
       <img v-if="previewUrl" :src="previewUrl" alt="معاينة التصميم" />
       <div v-else class="asset-placeholder">4:3</div>
-      <label class="upload">رفع صورة 4:3<input type="file" accept="image/*" @change="setPreview" /></label>
+      <label class="upload">رفع صورة 4:3<input type="file" accept="image/png,image/jpeg,image/webp" @change="setPreview" /></label>
     </section>
 
     <section class="code-editor">
@@ -101,9 +107,11 @@ function submit() {
 </template>
 
 <style scoped>
-.editor { display: grid; min-width: 0; align-content: start; background: #fff; }
+.editor { display: grid; width: 100%; min-width: 0; align-content: start; background: #fff; }
 .editor__bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 7px 10px; border-bottom: 1px solid #dfdcd6; background: #fff; }
 .editor__bar strong { min-width: 0; margin-inline-end: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.editor__actions { display: flex; gap: 6px; }
+.back { display: none; }
 button, select, input, textarea { font: inherit; }
 button, select { min-height: 32px; border: 1px solid #d9d5ce; border-radius: 7px; background: #fff; }
 button { padding: 5px 10px; cursor: pointer; }
@@ -130,5 +138,21 @@ textarea { padding: 8px; resize: vertical; line-height: 1.45; }
 .const-editor textarea { min-height: 240px; font: 12px/1.5 ui-monospace, SFMono-Regular, monospace; }
 .error { margin: 8px 10px 0; padding: 7px 9px; border-radius: 6px; color: #8d2929; background: #fff0f0; font-size: .75rem; }
 .empty { display: grid; min-height: 260px; place-items: center; color: #777; }
-@media (max-width: 720px) { .fields--meta { grid-template-columns: 1fr 1fr; } .fields--meta label:nth-child(3) { grid-column: 1 / -1; } }
+@media (max-width: 720px) {
+  .editor__bar { top: 48px; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 6px; min-height: auto; padding: 7px; }
+  .editor__bar strong { width: 100%; margin: 0; }
+  .editor__bar select { max-width: 104px; }
+  .editor__actions { grid-column: 2 / -1; justify-content: flex-end; }
+  .editor__actions button { min-width: 72px; }
+  .back { display: block; grid-row: 1 / 3; align-self: stretch; padding: 4px; }
+  .fields { gap: 7px; padding: 8px; }
+  .fields--meta { grid-template-columns: 1fr; }
+  .fields--meta label:nth-child(3), .wide { grid-column: auto; }
+  .asset-row { grid-template-columns: 96px minmax(0, 1fr); padding: 0 8px 8px; }
+  .asset-row img, .asset-placeholder { width: 96px; height: 72px; }
+  .upload { width: 100%; text-align: center; }
+  .code-editor, .const-editor { margin: 0 8px 8px; }
+  .code-editor textarea { min-height: 220px; }
+  .const-editor textarea { min-height: 280px; }
+}
 </style>
