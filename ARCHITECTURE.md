@@ -38,3 +38,18 @@ The Repository pattern is the deliberate seam for FastAPI. The rest is regular V
 and immutable constants keyed by design. The repository selects a design kit,
 `promptPackage.js` serializes its three files and merged Markdown, and the download
 service packages the same files into a dependency-free ZIP archive.
+
+## Admin write boundary
+
+The admin page uses `adminDesignRepository.js` as its only persistence boundary.
+Its current IndexedDB implementation seeds itself from the static mock API and
+stores uploaded 4:3 previews, demo source, metadata, constants, and the prompt
+authoring contract. FastAPI can replace this repository without changing the
+admin components or their state workflow.
+
+Prompt authoring and prompt delivery are intentionally separate:
+
+- `CONST_TEMPLATE.json` and `ADMIN_MANIFESTO.md` guide the admin-side AI that
+  compiles a reference design into validated constants.
+- `USER_MANIFESTO.md`, the filled `CONSTS.json`, and `USER_REQUEST.md` are the
+  final package delivered to the user's coding model.

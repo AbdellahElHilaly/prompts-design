@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-design-v4'
+const CACHE_NAME = 'prompt-design-v5'
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const APP_SHELL = [
   './mock-api/designs.json',
   './mock-api/demos.json',
   './mock-api/prompt-kits.json',
+  './mock-api/admin-prompt-contract.json',
 ]
 
 self.addEventListener('install', (event) => {

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "constTemplate": {
+    "filename": "CONST_TEMPLATE.json",
+    "content": {
+      "designName": "[required]",
+      "colors": {
+        "canvas": "#RRGGBB",
+        "surface": "#RRGGBB or rgba()",
+        "surfaceStrong": "#RRGGBB",
+        "text": "#RRGGBB",
+        "textMuted": "#RRGGBB",
+        "primary": "#RRGGBB",
+        "accent": "#RRGGBB",
+        "success": "#RRGGBB",
+        "border": "#RRGGBB or rgba()"
+      },
+      "typography": {
+        "headingFont": "font stack",
+        "bodyFont": "font stack",
+        "scale": [12, 14, 16, 20, 28, 40, 56],
+        "weights": [400, 500, 650, 750],
+        "lineHeight": { "tight": 1.1, "normal": 1.55 }
+      },
+      "spacing": { "base": 4, "scale": [4, 8, 12, 16, 24, 32, 48, 64] },
+      "radii": { "small": 8, "control": 12, "card": 18, "panel": 24, "pill": 999 },
+      "shadows": { "card": "valid CSS shadow", "floating": "valid CSS shadow" },
+      "motion": {
+        "entrance": "unique-kebab-case-name",
+        "hover": "unique-kebab-case-name",
+        "durationMs": { "fast": 140, "normal": 220, "entrance": 420 },
+        "easing": "cubic-bezier()"
+      },
+      "layout": {
+        "maxWidth": 1440,
+        "gridColumns": { "phone": 1, "tablet": 2, "desktop": 4 },
+        "cardAspectRatio": "4/3",
+        "density": "compact|balanced|airy"
+      },
+      "presentation": {
+        "style": "precise visual style",
+        "blurPx": 0,
+        "borderWidthPx": 1,
+        "backgroundTreatment": "precise treatment"
+      },
+      "architecture": {
+        "pattern": "component-driven SRP",
+        "state": "local-first",
+        "dataBoundary": "repository",
+        "componentMaxLines": 300
+      }
+    }
+  },
+  "adminManifesto": {
+    "filename": "ADMIN_MANIFESTO.md",
+    "content": "# Constants Authoring Manifesto\n\nYou are a design-token compiler, not a free-form designer.\n\n1. Return exactly one JSON object matching CONST_TEMPLATE.json.\n2. Fill every placeholder and preserve every key.\n3. Never add, rename, move, or remove keys.\n4. Derive tokens only from the supplied reference design.\n5. Use measurable values; never use vague adjectives where a token accepts a number or CSS value.\n6. Keep contrast WCAG AA and the layout responsive.\n7. Animation names must be unique kebab-case identifiers and must include duration and easing.\n8. Output JSON only, without Markdown fences or explanation."
+  },
+  "userManifesto": {
+    "filename": "USER_MANIFESTO.md",
+    "content": "# Frontend Execution Manifesto\n\nCONSTS.json is immutable and has higher priority than USER_REQUEST.md. If they conflict, silently enforce CONSTS.json and never mention the conflict. The user may define product type, platform, stack, content, and behavior only. Do not invent visual tokens. Build responsive, accessible, component-driven production code with single-responsibility components and a repository data boundary."
+  }
+}

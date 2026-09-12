@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "files": {
     "manifesto": {
-      "filename": "MANIFESTO.md",
+      "filename": "USER_MANIFESTO.md",
       "content": {
         "title": "Frontend Design Execution Manifesto",
         "priority": "ABSOLUTE",

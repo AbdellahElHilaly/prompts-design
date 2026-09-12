@@ -3,6 +3,8 @@ function formatList(items) {
 }
 
 function formatManifesto({ content }) {
+  if (typeof content === 'string') return `${content.trim()}\n`
+
   return `# ${content.title}
 
 **Priority:** ${content.priority}
