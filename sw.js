@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-design-v5'
+const CACHE_NAME = 'prompt-design-v6'
 const APP_SHELL = [
   './',
   './index.html',
